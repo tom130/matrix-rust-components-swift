@@ -18,3 +18,7 @@ To make the release you will need the following installed:
 3. matrix-rust-sdk cloned next to this repo `git clone https://github.com/matrix-org/matrix-rust-sdk`
 4. Checkout the `main` branch of the SDK (or another custom branch to release from).
 5. Any dependencies required to build the matrix-rust-sdk as mentioned in the [Apple platforms readme](https://github.com/matrix-org/matrix-rust-sdk/blob/main/bindings/apple/README.md).
+
+## watchOS
+
+Use `../build_xcframework_watchos.sh` for DDement watchOS artifacts. That wrapper requires matrix-rust-sdk PR #5872 or newer, installs the pinned nightly toolchain from `rust-toolchain.toml`, passes `--tier3-targets`, and verifies that the generated xcframework contains watchOS libraries.

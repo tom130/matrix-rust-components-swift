@@ -1,0 +1,45 @@
+name: Build watchOS xcframework
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "*+watchos.*"
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - name: Check out package
+        uses: actions/checkout@v4
+        with:
+          path: matrix-rust-components-swift
+
+      - name: Check out matrix-rust-sdk
+        uses: actions/checkout@v4
+        with:
+          repository: matrix-org/matrix-rust-sdk
+          path: matrix-rust-sdk
+
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build watchOS xcframework
+        working-directory: matrix-rust-components-swift
+        env:
+          MATRIX_RUST_SDK_DIR: ${{ github.workspace }}/matrix-rust-sdk
+        run: ./Tools/build_xcframework_watchos.sh
+
+      - name: Zip xcframework
+        working-directory: matrix-rust-components-swift/generated
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent MatrixSDKFFI.xcframework MatrixSDKFFI.xcframework.zip
+          shasum -a 256 MatrixSDKFFI.xcframework.zip > MatrixSDKFFI.xcframework.zip.sha256
+
+      - name: Upload xcframework artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MatrixSDKFFI-watchos-xcframework
+          path: |
+            matrix-rust-components-swift/generated/MatrixSDKFFI.xcframework.zip
+            matrix-rust-components-swift/generated/MatrixSDKFFI.xcframework.zip.sha256
