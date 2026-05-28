@@ -24,6 +24,17 @@ jobs:
       - name: Install stable Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Cache Cargo build outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            matrix-rust-sdk/target
+          key: ${{ runner.os }}-watchos-xcframework-${{ hashFiles('matrix-rust-sdk/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-watchos-xcframework-
+
       - name: Build watchOS xcframework
         working-directory: matrix-rust-components-swift
         env:
