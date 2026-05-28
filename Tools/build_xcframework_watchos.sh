@@ -28,6 +28,11 @@ rustup target add --toolchain stable \
 
 pushd "$SDK_DIR" >/dev/null
 
+# matrix-rust-sdk's xtask currently shells out with `rustup run nightly` for
+# tier-3 targets. Rewrite the checked-out copy so the build uses the pinned
+# reproducible nightly from this package instead of the moving nightly channel.
+perl -0pi -e "s/rustup run nightly cargo build/rustup run $NIGHTLY_TOOLCHAIN cargo build/g" xtask/src/swift.rs
+
 if ! cargo xtask swift build-framework --help | grep -q -- "--tier3-targets"; then
     echo "matrix-rust-sdk checkout does not expose xtask swift --tier3-targets." >&2
     echo "Use an SDK revision that includes matrix-org/matrix-rust-sdk#5872." >&2
