@@ -21,6 +21,10 @@ if ! command -v rustup >/dev/null 2>&1; then
 fi
 
 rustup toolchain install "$NIGHTLY_TOOLCHAIN" --component rust-src
+rustup target add \
+    aarch64-apple-ios \
+    aarch64-apple-ios-sim \
+    x86_64-apple-ios
 
 pushd "$SDK_DIR" >/dev/null
 
