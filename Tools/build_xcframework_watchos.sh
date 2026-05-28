@@ -41,6 +41,10 @@ fi
 
 unset SDKROOT
 
+# aws-lc-sys 0.39.x trips Clang 16's stricter arm64_32 diagnostics in generated
+# P-256 code. Keep the override scoped to the legacy watchOS target.
+export CFLAGS_arm64_32_apple_watchos="${CFLAGS_arm64_32_apple_watchos:-} -Wno-incompatible-function-pointer-types -Wno-incompatible-pointer-types -Wno-array-bounds"
+
 cargo xtask swift build-framework \
     --release \
     --sequentially \
