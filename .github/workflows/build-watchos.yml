@@ -2,9 +2,17 @@ name: Build watchOS xcframework
 
 on:
   workflow_dispatch:
+    inputs:
+      matrix_rust_sdk_ref:
+        description: "matrix-rust-sdk git ref to build"
+        required: true
+        default: "4ca424f5f2ca61a72cbbd9d2a78c7acfb7811d0e"
   push:
     tags:
       - "*watchos.*"
+
+env:
+  MATRIX_RUST_SDK_REF: ${{ inputs.matrix_rust_sdk_ref || '4ca424f5f2ca61a72cbbd9d2a78c7acfb7811d0e' }}
 
 jobs:
   build:
@@ -19,7 +27,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: matrix-org/matrix-rust-sdk
+          ref: ${{ env.MATRIX_RUST_SDK_REF }}
           path: matrix-rust-sdk
+
+      - name: Report matrix-rust-sdk ref
+        working-directory: matrix-rust-sdk
+        run: git rev-parse HEAD
 
       - name: Install stable Rust
         uses: dtolnay/rust-toolchain@stable
