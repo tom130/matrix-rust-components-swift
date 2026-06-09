@@ -25,13 +25,18 @@ rustup target add --toolchain stable \
     aarch64-apple-ios \
     aarch64-apple-ios-sim \
     x86_64-apple-ios
+rustup target add --toolchain "$NIGHTLY_TOOLCHAIN" \
+    aarch64-apple-ios \
+    aarch64-apple-ios-sim \
+    x86_64-apple-ios
 
 pushd "$SDK_DIR" >/dev/null
 
 # matrix-rust-sdk's xtask currently shells out with `rustup run nightly` for
-# tier-3 targets. Rewrite the checked-out copy so the build uses the pinned
-# reproducible nightly from this package instead of the moving nightly channel.
+# tier-3 targets and `rustup run stable` for iOS targets. Rewrite the checked-out
+# copy so every SDK slice uses the pinned reproducible toolchain.
 perl -0pi -e "s/rustup run nightly cargo build/rustup run $NIGHTLY_TOOLCHAIN cargo build/g" xtask/src/swift.rs
+perl -0pi -e "s/rustup run stable cargo build/rustup run $NIGHTLY_TOOLCHAIN cargo build/g" xtask/src/swift.rs
 
 if ! cargo xtask swift build-framework --help | grep -q -- "--tier3-targets"; then
     echo "matrix-rust-sdk checkout does not expose xtask swift --tier3-targets." >&2
