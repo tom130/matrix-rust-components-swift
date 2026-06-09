@@ -1604,7 +1604,7 @@ open func abortOauthAuth(authorizationData: OAuthAuthorizationData)async   {
             
         )
 }
-    
+
     /**
      * Get the content of the event of the given type out of the account data
      * store.
@@ -1748,7 +1748,7 @@ open func canDeactivateAccount() -> Bool  {
     )
 })
 }
-    
+
     /**
      * Clear all the non-critical caches for this Client instance.
      *
@@ -3814,6 +3814,15 @@ public protocol ClientBuilderProtocol: AnyObject, Sendable {
     func requestConfig(config: RequestConfig)  -> ClientBuilder
     
     /**
+     * Override DNS resolution for a domain.
+     *
+     * Addresses must be valid socket addresses such as `130.61.72.73:0` or
+     * `[2001:db8::1]:0`. Port `0` lets reqwest use the URL scheme's default
+     * port, or the explicit port from the URL.
+     */
+    func resolveToAddrs(domain: String, addresses: [String]) throws  -> ClientBuilder
+
+    /**
      * Set the strategy to be used for picking recipient devices when sending
      * an encrypted message.
      */
@@ -3947,7 +3956,7 @@ open func addRootCertificates(certificates: [Data]) -> ClientBuilder  {
     )
 })
 }
-    
+
     /**
      * Automatically create a backup version if no backup exists.
      */
@@ -4116,6 +4125,23 @@ open func requestConfig(config: RequestConfig) -> ClientBuilder  {
 })
 }
     
+    /**
+     * Override DNS resolution for a domain.
+     *
+     * Addresses must be valid socket addresses such as `130.61.72.73:0` or
+     * `[2001:db8::1]:0`. Port `0` lets reqwest use the URL scheme's default
+     * port, or the explicit port from the URL.
+     */
+open func resolveToAddrs(domain: String, addresses: [String])throws  -> ClientBuilder  {
+    return try  FfiConverterTypeClientBuilder_lift(try rustCallWithError(FfiConverterTypeClientBuildError_lift) {
+    uniffi_matrix_sdk_ffi_fn_method_clientbuilder_resolve_to_addrs(
+            self.uniffiCloneHandle(),
+        FfiConverterString.lower(domain),
+        FfiConverterSequenceString.lower(addresses),$0
+    )
+})
+}
+
     /**
      * Set the strategy to be used for picking recipient devices when sending
      * an encrypted message.
@@ -53320,6 +53346,9 @@ private let initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_matrix_sdk_ffi_checksum_method_clientbuilder_request_config() != 41133) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_matrix_sdk_ffi_checksum_method_clientbuilder_resolve_to_addrs() != 5653) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_matrix_sdk_ffi_checksum_method_clientbuilder_room_key_recipient_strategy() != 7083) {
