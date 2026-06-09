@@ -3,6 +3,10 @@ name: Build watchOS xcframework
 on:
   workflow_dispatch:
     inputs:
+      matrix_rust_sdk_repository:
+        description: "matrix-rust-sdk repository to build"
+        required: true
+        default: "matrix-org/matrix-rust-sdk"
       matrix_rust_sdk_ref:
         description: "matrix-rust-sdk git ref to build"
         required: true
@@ -12,6 +16,7 @@ on:
       - "*watchos.*"
 
 env:
+  MATRIX_RUST_SDK_REPOSITORY: ${{ inputs.matrix_rust_sdk_repository || 'matrix-org/matrix-rust-sdk' }}
   MATRIX_RUST_SDK_REF: ${{ inputs.matrix_rust_sdk_ref || '4ca424f5f2ca61a72cbbd9d2a78c7acfb7811d0e' }}
 
 jobs:
@@ -26,7 +31,7 @@ jobs:
       - name: Check out matrix-rust-sdk
         uses: actions/checkout@v4
         with:
-          repository: matrix-org/matrix-rust-sdk
+          repository: ${{ env.MATRIX_RUST_SDK_REPOSITORY }}
           ref: ${{ env.MATRIX_RUST_SDK_REF }}
           path: matrix-rust-sdk
 
