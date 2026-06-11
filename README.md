@@ -17,7 +17,7 @@ git clone https://github.com/matrix-org/matrix-rust-sdk ../matrix-rust-sdk
 ./Tools/build_xcframework_watchos.sh
 ```
 
-The script pins the nightly compiler through `rust-toolchain.toml`, installs `rust-src`, builds the iOS and watchOS targets, and writes `generated/MatrixSDKFFI.xcframework`. The generated framework must contain these Rust targets:
+The script pins the nightly compiler through `rust-toolchain.toml`, installs `rust-src`, builds the iOS and watchOS targets, writes `generated/MatrixSDKFFI.xcframework`, and refreshes `Sources/MatrixRustSDK` from the generated Swift bindings. It also checks that the generated Swift async Rust future helper contains the Swift-task cancellation patch required by the watch URLSession transport. The generated framework must contain these Rust targets:
 
 - `aarch64-apple-ios`
 - `aarch64-apple-ios-sim`

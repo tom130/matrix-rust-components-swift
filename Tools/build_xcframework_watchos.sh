@@ -5,6 +5,7 @@ set -euo pipefail
 PACKAGE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SDK_DIR="${MATRIX_RUST_SDK_DIR:-"$(cd "$PACKAGE_DIR/.." && pwd)/matrix-rust-sdk"}"
 OUTPUT_DIR="${OUTPUT_DIR:-"$PACKAGE_DIR/generated"}"
+SWIFT_OUTPUT_DIR="$PACKAGE_DIR/Sources/MatrixRustSDK"
 IOS_DEPLOYMENT_TARGET="${IOS_DEPLOYMENT_TARGET:-16.0}"
 WATCHOS_DEPLOYMENT_TARGET="${WATCHOS_DEPLOYMENT_TARGET:-10.0}"
 NIGHTLY_TOOLCHAIN="${NIGHTLY_TOOLCHAIN:-nightly-2025-11-15}"
@@ -69,7 +70,9 @@ popd >/dev/null
 rm -rf "$OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
 rsync -a "$SDK_DIR/bindings/apple/generated/MatrixSDKFFI.xcframework" "$OUTPUT_DIR/"
+rsync -a --delete "$SDK_DIR/bindings/apple/generated/swift/" "$SWIFT_OUTPUT_DIR/"
 
 plutil -p "$OUTPUT_DIR/MatrixSDKFFI.xcframework/Info.plist" | grep -E 'watchos|watchsimulator' >/dev/null
+grep -q "UniffiRustFutureCancellationState" "$SWIFT_OUTPUT_DIR/matrix_sdk_ffi.swift"
 
-echo "Generated $OUTPUT_DIR/MatrixSDKFFI.xcframework"
+echo "Generated $OUTPUT_DIR/MatrixSDKFFI.xcframework and refreshed $SWIFT_OUTPUT_DIR"

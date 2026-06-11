@@ -1604,7 +1604,7 @@ open func abortOauthAuth(authorizationData: OAuthAuthorizationData)async   {
             
         )
 }
-
+    
     /**
      * Get the content of the event of the given type out of the account data
      * store.
@@ -1748,7 +1748,7 @@ open func canDeactivateAccount() -> Bool  {
     )
 })
 }
-
+    
     /**
      * Clear all the non-critical caches for this Client instance.
      *
@@ -3813,6 +3813,8 @@ public protocol ClientBuilderProtocol: AnyObject, Sendable {
      */
     func requestConfig(config: RequestConfig)  -> ClientBuilder
     
+    func requestExecutor(executor: HttpRequestExecutor)  -> ClientBuilder
+    
     /**
      * Override DNS resolution for a domain.
      *
@@ -3821,7 +3823,7 @@ public protocol ClientBuilderProtocol: AnyObject, Sendable {
      * port, or the explicit port from the URL.
      */
     func resolveToAddrs(domain: String, addresses: [String]) throws  -> ClientBuilder
-
+    
     /**
      * Set the strategy to be used for picking recipient devices when sending
      * an encrypted message.
@@ -3956,7 +3958,7 @@ open func addRootCertificates(certificates: [Data]) -> ClientBuilder  {
     )
 })
 }
-
+    
     /**
      * Automatically create a backup version if no backup exists.
      */
@@ -4125,6 +4127,15 @@ open func requestConfig(config: RequestConfig) -> ClientBuilder  {
 })
 }
     
+open func requestExecutor(executor: HttpRequestExecutor) -> ClientBuilder  {
+    return try!  FfiConverterTypeClientBuilder_lift(try! rustCall() {
+    uniffi_matrix_sdk_ffi_fn_method_clientbuilder_request_executor(
+            self.uniffiCloneHandle(),
+        FfiConverterCallbackInterfaceHttpRequestExecutor_lower(executor),$0
+    )
+})
+}
+    
     /**
      * Override DNS resolution for a domain.
      *
@@ -4141,7 +4152,7 @@ open func resolveToAddrs(domain: String, addresses: [String])throws  -> ClientBu
     )
 })
 }
-
+    
     /**
      * Set the strategy to be used for picking recipient devices when sending
      * an encrypted message.
@@ -20167,6 +20178,60 @@ public func FfiConverterTypeGlobalSearchResult_lower(_ value: GlobalSearchResult
 }
 
 
+public struct HttpHeader: Equatable, Hashable {
+    public var name: String
+    public var value: String
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(name: String, value: String) {
+        self.name = name
+        self.value = value
+    }
+
+    
+
+    
+}
+
+#if compiler(>=6)
+extension HttpHeader: Sendable {}
+#endif
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeHttpHeader: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> HttpHeader {
+        return
+            try HttpHeader(
+                name: FfiConverterString.read(from: &buf), 
+                value: FfiConverterString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: HttpHeader, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.name, into: &buf)
+        FfiConverterString.write(value.value, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeHttpHeader_lift(_ buf: RustBuffer) throws -> HttpHeader {
+    return try FfiConverterTypeHttpHeader.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeHttpHeader_lower(_ value: HttpHeader) -> RustBuffer {
+    return FfiConverterTypeHttpHeader.lower(value)
+}
+
+
 public struct HttpPusherData: Equatable, Hashable {
     public var url: String
     public var format: PushFormat?
@@ -20222,6 +20287,130 @@ public func FfiConverterTypeHttpPusherData_lift(_ buf: RustBuffer) throws -> Htt
 #endif
 public func FfiConverterTypeHttpPusherData_lower(_ value: HttpPusherData) -> RustBuffer {
     return FfiConverterTypeHttpPusherData.lower(value)
+}
+
+
+public struct HttpTransportRequest: Equatable, Hashable {
+    public var method: String
+    public var url: String
+    public var headers: [HttpHeader]
+    public var body: Data?
+    public var timeoutMs: UInt64?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(method: String, url: String, headers: [HttpHeader], body: Data?, timeoutMs: UInt64?) {
+        self.method = method
+        self.url = url
+        self.headers = headers
+        self.body = body
+        self.timeoutMs = timeoutMs
+    }
+
+    
+
+    
+}
+
+#if compiler(>=6)
+extension HttpTransportRequest: Sendable {}
+#endif
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeHttpTransportRequest: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> HttpTransportRequest {
+        return
+            try HttpTransportRequest(
+                method: FfiConverterString.read(from: &buf), 
+                url: FfiConverterString.read(from: &buf), 
+                headers: FfiConverterSequenceTypeHttpHeader.read(from: &buf), 
+                body: FfiConverterOptionData.read(from: &buf), 
+                timeoutMs: FfiConverterOptionUInt64.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: HttpTransportRequest, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.method, into: &buf)
+        FfiConverterString.write(value.url, into: &buf)
+        FfiConverterSequenceTypeHttpHeader.write(value.headers, into: &buf)
+        FfiConverterOptionData.write(value.body, into: &buf)
+        FfiConverterOptionUInt64.write(value.timeoutMs, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeHttpTransportRequest_lift(_ buf: RustBuffer) throws -> HttpTransportRequest {
+    return try FfiConverterTypeHttpTransportRequest.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeHttpTransportRequest_lower(_ value: HttpTransportRequest) -> RustBuffer {
+    return FfiConverterTypeHttpTransportRequest.lower(value)
+}
+
+
+public struct HttpTransportResponse: Equatable, Hashable {
+    public var statusCode: UInt16
+    public var headers: [HttpHeader]
+    public var body: Data
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(statusCode: UInt16, headers: [HttpHeader], body: Data) {
+        self.statusCode = statusCode
+        self.headers = headers
+        self.body = body
+    }
+
+    
+
+    
+}
+
+#if compiler(>=6)
+extension HttpTransportResponse: Sendable {}
+#endif
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeHttpTransportResponse: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> HttpTransportResponse {
+        return
+            try HttpTransportResponse(
+                statusCode: FfiConverterUInt16.read(from: &buf), 
+                headers: FfiConverterSequenceTypeHttpHeader.read(from: &buf), 
+                body: FfiConverterData.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: HttpTransportResponse, into buf: inout [UInt8]) {
+        FfiConverterUInt16.write(value.statusCode, into: &buf)
+        FfiConverterSequenceTypeHttpHeader.write(value.headers, into: &buf)
+        FfiConverterData.write(value.body, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeHttpTransportResponse_lift(_ buf: RustBuffer) throws -> HttpTransportResponse {
+    return try FfiConverterTypeHttpTransportResponse.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeHttpTransportResponse_lower(_ value: HttpTransportResponse) -> RustBuffer {
+    return FfiConverterTypeHttpTransportResponse.lower(value)
 }
 
 
@@ -31840,6 +32029,102 @@ public func FfiConverterTypeHistoryVisibility_lower(_ value: HistoryVisibility) 
     return FfiConverterTypeHistoryVisibility.lower(value)
 }
 
+
+
+public enum HttpTransportError: Swift.Error, Equatable, Hashable, Foundation.LocalizedError {
+
+    
+    
+    case Network(msg: String
+    )
+    case Timeout
+    case Cancelled
+    case InvalidRequest(msg: String
+    )
+
+    
+
+    
+
+    
+    public var errorDescription: String? {
+        String(reflecting: self)
+    }
+    
+}
+
+#if compiler(>=6)
+extension HttpTransportError: Sendable {}
+#endif
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeHttpTransportError: FfiConverterRustBuffer {
+    typealias SwiftType = HttpTransportError
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> HttpTransportError {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+
+        
+
+        
+        case 1: return .Network(
+            msg: try FfiConverterString.read(from: &buf)
+            )
+        case 2: return .Timeout
+        case 3: return .Cancelled
+        case 4: return .InvalidRequest(
+            msg: try FfiConverterString.read(from: &buf)
+            )
+
+         default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: HttpTransportError, into buf: inout [UInt8]) {
+        switch value {
+
+        
+
+        
+        
+        case let .Network(msg):
+            writeInt(&buf, Int32(1))
+            FfiConverterString.write(msg, into: &buf)
+            
+        
+        case .Timeout:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .Cancelled:
+            writeInt(&buf, Int32(3))
+        
+        
+        case let .InvalidRequest(msg):
+            writeInt(&buf, Int32(4))
+            FfiConverterString.write(msg, into: &buf)
+            
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeHttpTransportError_lift(_ buf: RustBuffer) throws -> HttpTransportError {
+    return try FfiConverterTypeHttpTransportError.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeHttpTransportError_lower(_ value: HttpTransportError) -> RustBuffer {
+    return FfiConverterTypeHttpTransportError.lower(value)
+}
 
 
 public enum HumanQrGrantLoginError: Swift.Error, Equatable, Hashable, Foundation.LocalizedError {
@@ -44160,6 +44445,149 @@ public func FfiConverterCallbackInterfaceGrantQrLoginProgressListener_lower(_ v:
 
 
 
+public protocol HttpRequestExecutor: AnyObject, Sendable {
+    
+    func execute(request: HttpTransportRequest) async throws  -> HttpTransportResponse
+    
+}
+
+
+// Put the implementation in a struct so we don't pollute the top-level namespace
+fileprivate struct UniffiCallbackInterfaceHttpRequestExecutor {
+
+    // Create the VTable using a series of closures.
+    // Swift automatically converts these into C callback functions.
+    //
+    // This creates 1-element array, since this seems to be the only way to construct a const
+    // pointer that we can pass to the Rust code.
+    static let vtable: [UniffiVTableCallbackInterfaceHttpRequestExecutor] = [UniffiVTableCallbackInterfaceHttpRequestExecutor(
+        uniffiFree: { (uniffiHandle: UInt64) -> () in
+            do {
+                try FfiConverterCallbackInterfaceHttpRequestExecutor.handleMap.remove(handle: uniffiHandle)
+            } catch {
+                print("Uniffi callback interface HttpRequestExecutor: handle missing in uniffiFree")
+            }
+        },
+        uniffiClone: { (uniffiHandle: UInt64) -> UInt64 in
+            do {
+                return try FfiConverterCallbackInterfaceHttpRequestExecutor.handleMap.clone(handle: uniffiHandle)
+            } catch {
+                fatalError("Uniffi callback interface HttpRequestExecutor: handle missing in uniffiClone")
+            }
+        },
+        execute: { (
+            uniffiHandle: UInt64,
+            request: RustBuffer,
+            uniffiFutureCallback: @escaping UniffiForeignFutureCompleteRustBuffer,
+            uniffiCallbackData: UInt64,
+            uniffiOutDroppedCallback: UnsafeMutablePointer<UniffiForeignFutureDroppedCallbackStruct>
+        ) in
+            let makeCall = {
+                () async throws -> HttpTransportResponse in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceHttpRequestExecutor.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return try await uniffiObj.execute(
+                     request: try FfiConverterTypeHttpTransportRequest_lift(request)
+                )
+            }
+
+            let uniffiHandleSuccess = { (returnValue: HttpTransportResponse) in
+                uniffiFutureCallback(
+                    uniffiCallbackData,
+                    UniffiForeignFutureResultRustBuffer(
+                        returnValue: FfiConverterTypeHttpTransportResponse_lower(returnValue),
+                        callStatus: RustCallStatus()
+                    )
+                )
+            }
+            let uniffiHandleError = { (statusCode, errorBuf) in
+                uniffiFutureCallback(
+                    uniffiCallbackData,
+                    UniffiForeignFutureResultRustBuffer(
+                        returnValue: RustBuffer.empty(),
+                        callStatus: RustCallStatus(code: statusCode, errorBuf: errorBuf)
+                    )
+                )
+            }
+            uniffiTraitInterfaceCallAsyncWithError(
+                makeCall: makeCall,
+                handleSuccess: uniffiHandleSuccess,
+                handleError: uniffiHandleError,
+                lowerError: FfiConverterTypeHttpTransportError_lower,
+                droppedCallback: uniffiOutDroppedCallback
+            )
+        }
+    )]
+}
+
+private func uniffiCallbackInitHttpRequestExecutor() {
+    uniffi_matrix_sdk_ffi_fn_init_callback_vtable_httprequestexecutor(UniffiCallbackInterfaceHttpRequestExecutor.vtable)
+}
+
+// FfiConverter protocol for callback interfaces
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterCallbackInterfaceHttpRequestExecutor {
+    fileprivate static let handleMap = UniffiHandleMap<HttpRequestExecutor>()
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+extension FfiConverterCallbackInterfaceHttpRequestExecutor : FfiConverter {
+    typealias SwiftType = HttpRequestExecutor
+    typealias FfiType = UInt64
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func lift(_ handle: UInt64) throws -> SwiftType {
+        try handleMap.get(handle: handle)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func lower(_ v: SwiftType) -> UInt64 {
+        return handleMap.insert(obj: v)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func write(_ v: SwiftType, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(v))
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterCallbackInterfaceHttpRequestExecutor_lift(_ handle: UInt64) throws -> HttpRequestExecutor {
+    return try FfiConverterCallbackInterfaceHttpRequestExecutor.lift(handle)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterCallbackInterfaceHttpRequestExecutor_lower(_ v: HttpRequestExecutor) -> UInt64 {
+    return FfiConverterCallbackInterfaceHttpRequestExecutor.lower(v)
+}
+
+
+
+
 public protocol IdentityStatusChangeListener: AnyObject, Sendable {
     
     func call(identityStatusChange: [IdentityStatusChange]) 
@@ -51129,6 +51557,31 @@ fileprivate struct FfiConverterSequenceTypeGlobalSearchResult: FfiConverterRustB
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterSequenceTypeHttpHeader: FfiConverterRustBuffer {
+    typealias SwiftType = [HttpHeader]
+
+    public static func write(_ value: [HttpHeader], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeHttpHeader.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [HttpHeader] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [HttpHeader]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeHttpHeader.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterSequenceTypeIdentityStatusChange: FfiConverterRustBuffer {
     typealias SwiftType = [IdentityStatusChange]
 
@@ -52458,11 +52911,88 @@ private let UNIFFI_RUST_FUTURE_POLL_WAKE: Int8 = 1
 
 fileprivate let uniffiContinuationHandleMap = UniffiHandleMap<UnsafeContinuation<Int8, Never>>()
 
+fileprivate final class UniffiRustFutureCancellationState: @unchecked Sendable {
+    private let rustFuture: UInt64
+    private let freeFunc: (UInt64) -> ()
+    private let lock = NSLock()
+    private var continuationHandle: UInt64?
+    private var isCancelled = false
+    private var isFreed = false
+    
+    init(rustFuture: UInt64, freeFunc: @escaping (UInt64) -> ()) {
+        self.rustFuture = rustFuture
+        self.freeFunc = freeFunc
+    }
+    
+    func setContinuationHandle(_ handle: UInt64) -> Bool {
+        lock.withLock {
+            guard !isCancelled else {
+                return false
+            }
+            
+            continuationHandle = handle
+            return true
+        }
+    }
+    
+    func clearContinuationHandle(_ handle: UInt64) {
+        lock.withLock {
+            if continuationHandle == handle {
+                continuationHandle = nil
+            }
+        }
+    }
+    
+    func cancel() {
+        let handle: UInt64?
+        let shouldFree: Bool
+        
+        (handle, shouldFree) = lock.withLock {
+            guard !isCancelled else {
+                return (nil, false)
+            }
+            
+            isCancelled = true
+            let handle = continuationHandle
+            continuationHandle = nil
+            let shouldFree = !isFreed
+            isFreed = true
+            return (handle, shouldFree)
+        }
+        
+        if shouldFree {
+            freeFunc(rustFuture)
+        }
+        
+        if let handle,
+           let continuation = try? uniffiContinuationHandleMap.remove(handle: handle) {
+            continuation.resume(returning: UNIFFI_RUST_FUTURE_POLL_READY)
+        }
+    }
+    
+    func free() {
+        let shouldFree = lock.withLock {
+            continuationHandle = nil
+            
+            guard !isFreed else {
+                return false
+            }
+            
+            isFreed = true
+            return true
+        }
+        
+        if shouldFree {
+            freeFunc(rustFuture)
+        }
+    }
+}
+
 fileprivate func uniffiRustCallAsync<F, T>(
     rustFutureFunc: () -> UInt64,
     pollFunc: (UInt64, @escaping UniffiRustFutureContinuationCallback, UInt64) -> (),
     completeFunc: (UInt64, UnsafeMutablePointer<RustCallStatus>) -> F,
-    freeFunc: (UInt64) -> (),
+    freeFunc: @escaping (UInt64) -> (),
     liftFunc: (F) throws -> T,
     errorHandler: ((RustBuffer) throws -> Swift.Error)?
 ) async throws -> T {
@@ -52470,26 +53000,51 @@ fileprivate func uniffiRustCallAsync<F, T>(
     // RustCallStatus param, so doesn't use makeRustCall()
     uniffiEnsureMatrixSdkFfiInitialized()
     let rustFuture = rustFutureFunc()
+    let cancellationState = UniffiRustFutureCancellationState(rustFuture: rustFuture, freeFunc: freeFunc)
     defer {
-        freeFunc(rustFuture)
+        cancellationState.free()
     }
-    var pollResult: Int8;
-    repeat {
-        pollResult = await withUnsafeContinuation {
-            pollFunc(
-                rustFuture,
-                { handle, pollResult in
-                    uniffiFutureContinuationCallback(handle: handle, pollResult: pollResult)
-                },
-                uniffiContinuationHandleMap.insert(obj: $0)
-            )
-        }
-    } while pollResult != UNIFFI_RUST_FUTURE_POLL_READY
-
-    return try liftFunc(makeRustCall(
-        { completeFunc(rustFuture, $0) },
-        errorHandler: errorHandler
-    ))
+    
+    return try await withTaskCancellationHandler {
+        var pollResult: Int8
+        repeat {
+            var continuationHandle: UInt64?
+            pollResult = await withUnsafeContinuation {
+                let handle = uniffiContinuationHandleMap.insert(obj: $0)
+                continuationHandle = handle
+                
+                guard cancellationState.setContinuationHandle(handle) else {
+                    if let continuation = try? uniffiContinuationHandleMap.remove(handle: handle) {
+                        continuation.resume(returning: UNIFFI_RUST_FUTURE_POLL_READY)
+                    }
+                    return
+                }
+                
+                pollFunc(
+                    rustFuture,
+                    { handle, pollResult in
+                        uniffiFutureContinuationCallback(handle: handle, pollResult: pollResult)
+                    },
+                    handle
+                )
+            }
+            
+            if let continuationHandle {
+                cancellationState.clearContinuationHandle(continuationHandle)
+            }
+            
+            if Task.isCancelled {
+                throw CancellationError()
+            }
+        } while pollResult != UNIFFI_RUST_FUTURE_POLL_READY
+        
+        return try liftFunc(makeRustCall(
+            { completeFunc(rustFuture, $0) },
+            errorHandler: errorHandler
+        ))
+    } onCancel: {
+        cancellationState.cancel()
+    }
 }
 
 // Callback handlers for an async calls.  These are invoked by Rust when the future is ready.  They
@@ -52500,6 +53055,96 @@ fileprivate func uniffiFutureContinuationCallback(handle: UInt64, pollResult: In
     } else {
         print("uniffiFutureContinuationCallback invalid handle")
     }
+}
+private func uniffiTraitInterfaceCallAsync<T>(
+    makeCall: @escaping () async throws -> T,
+    handleSuccess: @escaping (T) -> (),
+    handleError: @escaping (Int8, RustBuffer) -> (),
+    droppedCallback: UnsafeMutablePointer<UniffiForeignFutureDroppedCallbackStruct>
+) {
+    let task = Task {
+        // Note: it's important we call either `handleSuccess` or `handleError` exactly once.  Each
+        // call consumes an Arc reference, which means there should be no possibility of a double
+        // call.  The following code is structured so that will will never call both `handleSuccess`
+        // and `handleError`, even in the face of weird errors.
+        //
+        // On platforms that need extra machinery to make C-ABI calls, like JNA or ctypes, it's
+        // possible that we fail to make either call.  However, it doesn't seem like this is
+        // possible on Swift since swift can just make the C call directly.
+        var callResult: T
+        do {
+            callResult = try await makeCall()
+        } catch {
+            handleError(CALL_UNEXPECTED_ERROR, FfiConverterString.lower(String(describing: error)))
+            return
+        }
+        handleSuccess(callResult)
+    }
+    let handle = UNIFFI_FOREIGN_FUTURE_HANDLE_MAP.insert(obj: task)
+    droppedCallback.pointee = UniffiForeignFutureDroppedCallbackStruct(
+        handle: handle,
+        free: uniffiForeignFutureDroppedCallback
+    )
+}
+
+private func uniffiTraitInterfaceCallAsyncWithError<T, E>(
+    makeCall: @escaping () async throws -> T,
+    handleSuccess: @escaping (T) -> (),
+    handleError: @escaping (Int8, RustBuffer) -> (),
+    lowerError: @escaping (E) -> RustBuffer,
+    droppedCallback: UnsafeMutablePointer<UniffiForeignFutureDroppedCallbackStruct>
+) {
+    let task = Task {
+        // See the note in uniffiTraitInterfaceCallAsync for details on `handleSuccess` and
+        // `handleError`.
+        var callResult: T
+        do {
+            callResult = try await makeCall()
+        } catch let error as E {
+            handleError(CALL_ERROR, lowerError(error))
+            return
+        } catch {
+            handleError(CALL_UNEXPECTED_ERROR, FfiConverterString.lower(String(describing: error)))
+            return
+        }
+        handleSuccess(callResult)
+    }
+    let handle = UNIFFI_FOREIGN_FUTURE_HANDLE_MAP.insert(obj: task)
+    droppedCallback.pointee = UniffiForeignFutureDroppedCallbackStruct(
+        handle: handle,
+        free: uniffiForeignFutureDroppedCallback
+    )
+}
+
+// Borrow the callback handle map implementation to store foreign future handles
+// TODO: consolidate the handle-map code (https://github.com/mozilla/uniffi-rs/pull/1823)
+fileprivate let UNIFFI_FOREIGN_FUTURE_HANDLE_MAP = UniffiHandleMap<UniffiForeignFutureTask>()
+
+// Protocol for tasks that handle foreign futures.
+//
+// Defining a protocol allows all tasks to be stored in the same handle map.  This can't be done
+// with the task object itself, since has generic parameters.
+fileprivate protocol UniffiForeignFutureTask {
+    func cancel()
+}
+
+extension Task: UniffiForeignFutureTask {}
+
+private func uniffiForeignFutureDroppedCallback(handle: UInt64) {
+    do {
+        let task = try UNIFFI_FOREIGN_FUTURE_HANDLE_MAP.remove(handle: handle)
+        // Set the cancellation flag on the task.  If it's still running, the code can check the
+        // cancellation flag or call `Task.checkCancellation()`.  If the task has completed, this is
+        // a no-op.
+        task.cancel()
+    } catch {
+        print("uniffiForeignFutureDroppedCallback: handle missing from handlemap")
+    }
+}
+
+// For testing
+public func uniffiForeignFutureHandleCountMatrixSdkFfi() -> Int {
+    UNIFFI_FOREIGN_FUTURE_HANDLE_MAP.count
 }
 public func sdkGitSha() -> String  {
     return try!  FfiConverterString.lift(try! rustCall() {
@@ -53346,6 +53991,9 @@ private let initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_matrix_sdk_ffi_checksum_method_clientbuilder_request_config() != 41133) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_matrix_sdk_ffi_checksum_method_clientbuilder_request_executor() != 58953) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_matrix_sdk_ffi_checksum_method_clientbuilder_resolve_to_addrs() != 5653) {
@@ -54512,6 +55160,9 @@ private let initializationResult: InitializationResult = {
     if (uniffi_matrix_sdk_ffi_checksum_method_verificationstatelistener_on_update() != 33992) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_matrix_sdk_ffi_checksum_method_httprequestexecutor_execute() != 42215) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_matrix_sdk_ffi_checksum_method_livelocationslistener_on_update() != 46484) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -54636,6 +55287,7 @@ private let initializationResult: InitializationResult = {
     uniffiCallbackInitGeneratedQrLoginProgressListener()
     uniffiCallbackInitGrantGeneratedQrLoginProgressListener()
     uniffiCallbackInitGrantQrLoginProgressListener()
+    uniffiCallbackInitHttpRequestExecutor()
     uniffiCallbackInitIdentityStatusChangeListener()
     uniffiCallbackInitIgnoredUsersListener()
     uniffiCallbackInitKnockRequestsListener()
